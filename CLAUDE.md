@@ -14,15 +14,16 @@ pnpm test:e2e         # pruebas de punta a punta (test/*.e2e-spec.ts, usan la BD
 
 Necesita `.env` (ver `.env.example`): `PORT` (3100), `FRONTEND_URL` (CORS, http://localhost:4100), `DATABASE_URI` (Atlas, base `estas-en-la-cima`).
 
-## Stack y diferencias con ÁMBAR
+## Stack
 
+- Usar siempre las últimas versiones estables. Excepción actual: TypeScript se queda en 6.x porque @nestjs/graphql 14 aún no admite TypeScript 7 (revisar su peerDependency antes de subir).
 - **NestJS 12 con módulos ES** (`"type": "module"`): los imports relativos llevan extensión `.js` (`./app.module.js`) aunque el archivo sea `.ts`. Las librerías CommonJS (mongoose, etc.) exponen sus *valores* por el import por defecto (`mongoose.ConnectionStates`); los imports con nombre solo sirven para tipos.
 - **Vitest** en vez de Jest y **oxlint** en vez de ESLint (lo que trae el CLI de Nest 12).
 - `isolatedModules` + `emitDecoratorMetadata`: los tipos usados en firmas con decoradores deben importarse con `import type`.
 
 ## Arquitectura
 
-Arquitectura por capas por módulo en `src/module/<dominio>/` (**singular** `module`), igual que ÁMBAR:
+Arquitectura por capas por módulo en `src/module/<dominio>/` (**singular** `module`):
 
 - `domain/` — entidades y reglas de negocio sin frameworks, interfaces de repositorios (puertos)
 - `application/` — casos de uso (una acción de negocio cada uno), dependen solo de interfaces inyectadas por tokens
