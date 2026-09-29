@@ -1,0 +1,27 @@
+# Compilado
+/dist
+/node_modules
+/build
+
+# Secretos: el .env tiene la conexión a la base de datos y futuras claves
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Tests
+/coverage
+
+# Sistema operativo y editores
+.DS_Store
+/.idea
+/.vscode/*
+!/.vscode/extensions.json
+
+# Caché de TypeScript
+*.tsbuildinfo

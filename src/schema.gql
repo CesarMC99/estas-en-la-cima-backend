@@ -1,0 +1,22 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Estado de la conexión con MongoDB"""
+enum DatabaseStatus {
+  CONNECTED
+  DISCONNECTED
+}
+
+"""Estado del servidor, para saber si está vivo"""
+type HealthStatus {
+  database: DatabaseStatus!
+
+  """Siempre true si el servidor responde"""
+  ok: Boolean!
+}
+
+type Query {
+  """Estado del servidor y de la base de datos"""
+  health: HealthStatus!
+}
