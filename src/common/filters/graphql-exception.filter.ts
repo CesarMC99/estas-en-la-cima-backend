@@ -72,7 +72,23 @@ export class GraphqlExceptionFilter implements ExceptionFilter {
         ? raw.map((text) => text.replace(/^(\w+\.)+/, '')).join(', ')
         : raw;
 
-      return new GraphQLError(message, { extensions: { code, status } });
+      /*
+       * `field` (opcional): qué dato del formulario causó el error, para que
+       * el frontend lo marque en ese campo. Un caso de uso lo indica lanzando
+       * por ejemplo new ConflictException({ message, field: 'email' }).
+       */
+      const field =
+        typeof response === 'object' && response !== null
+          ? (response as { field?: unknown }).field
+          : undefined;
+
+      return new GraphQLError(message, {
+        extensions: {
+          code,
+          status,
+          ...(typeof field === 'string' ? { field } : {}),
+        },
+      });
     }
 
     // Error inesperado: detalle completo en el log, mensaje genérico al cliente

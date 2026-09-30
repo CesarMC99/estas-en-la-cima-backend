@@ -67,7 +67,11 @@ export class RegisterUseCase {
       return await this.sessionIssuer.start(user);
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
-        throw new ConflictException(CONFLICT_MESSAGES[error.field]);
+        // `field` le dice al frontend en qué campo mostrar el mensaje
+        throw new ConflictException({
+          message: CONFLICT_MESSAGES[error.field],
+          field: error.field,
+        });
       }
       throw error;
     }

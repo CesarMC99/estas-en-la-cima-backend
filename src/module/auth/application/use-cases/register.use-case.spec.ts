@@ -51,14 +51,17 @@ describe('RegisterUseCase', () => {
     ['email', 'Ya hay una cuenta con ese correo. ¿Quieres ingresar?'],
     ['phone', 'Ya hay una cuenta con ese celular. ¿Quieres ingresar?'],
   ] as const)(
-    'si el %s ya existe responde CONFLICT con un mensaje claro',
+    'si el %s ya existe responde CONFLICT con un mensaje claro y el campo',
     async (field, message) => {
       const { users, useCase } = setup();
       users.create.mockRejectedValue(new UserAlreadyExistsError(field));
 
-      await expect(useCase.execute(command)).rejects.toThrow(
-        new ConflictException(message),
-      );
+      const error = await useCase.execute(command).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(ConflictException);
+      expect((error as ConflictException).getResponse()).toEqual({
+        message,
+        field,
+      });
     },
   );
 });
