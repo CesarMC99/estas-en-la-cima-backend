@@ -2,11 +2,38 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Account {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+
+  """Formato internacional: +51987654321"""
+  phone: String!
+
+  """fan o admin"""
+  roles: [String!]!
+  username: String!
+}
+
+type AuthPayload {
+  """Token de acceso: va en la cabecera Authorization: Bearer"""
+  accessToken: String!
+
+  """Segundos que dura el token de acceso"""
+  accessTokenExpiresIn: Int!
+  account: Account!
+}
+
 """Estado de la conexión con MongoDB"""
 enum DatabaseStatus {
   CONNECTED
   DISCONNECTED
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 """Estado del servidor, para saber si está vivo"""
 type HealthStatus {
@@ -16,7 +43,59 @@ type HealthStatus {
   ok: Boolean!
 }
 
+input LoginInput {
+  """Correo o celular"""
+  emailOrPhone: String!
+  password: String!
+}
+
+type Mutation {
+  """Ingresar con correo o celular"""
+  login(input: LoginInput!): AuthPayload!
+
+  """Cerrar sesión en este dispositivo"""
+  logout: Boolean!
+
+  """Renueva la sesión con la cookie y entrega un token de acceso nuevo"""
+  refreshSession: AuthPayload!
+
+  """Crear cuenta (deja la sesión iniciada)"""
+  register(input: RegisterInput!): AuthPayload!
+
+  """
+  Envía un código de 6 dígitos al correo de la cuenta. Responde true siempre, exista o no la cuenta
+  """
+  requestPasswordReset(input: RequestPasswordResetInput!): Boolean!
+
+  """Cambia la contraseña con el código del correo"""
+  resetPassword(input: ResetPasswordInput!): Boolean!
+}
+
 type Query {
   """Estado del servidor y de la base de datos"""
   health: HealthStatus!
+
+  """La cuenta de quien tiene la sesión iniciada"""
+  me: Account!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+
+  """Celular peruano de 9 dígitos (con o sin +51)"""
+  phone: String!
+  username: String!
+}
+
+input RequestPasswordResetInput {
+  """Correo o celular de la cuenta"""
+  emailOrPhone: String!
+}
+
+input ResetPasswordInput {
+  """Código de 6 dígitos que llegó al correo"""
+  code: String!
+  emailOrPhone: String!
+  newPassword: String!
 }

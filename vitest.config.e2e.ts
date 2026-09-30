@@ -7,5 +7,9 @@ export default defineConfig({
     globals: true,
     root: './',
     include: ['**/*.e2e-spec.ts'],
+    // Antes de las pruebas: apunta la app a una base de datos SOLO de pruebas
+    setupFiles: ['./test/setup-e2e.ts'],
+    // Los archivos e2e comparten esa base: se ejecutan uno tras otro
+    fileParallelism: false,
   },
 });

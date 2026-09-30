@@ -21,12 +21,17 @@ import { DatabaseStatus, HealthStatus } from './health.types.js';
 export class HealthResolver {
   constructor(@InjectConnection() private readonly connection: Connection) {}
 
-  @Query(() => HealthStatus, { description: 'Estado del servidor y de la base de datos' })
+  @Query(() => HealthStatus, {
+    description: 'Estado del servidor y de la base de datos',
+  })
   health(): HealthStatus {
-    const isConnected = this.connection.readyState === mongoose.ConnectionStates.connected;
+    const isConnected =
+      this.connection.readyState === mongoose.ConnectionStates.connected;
     return {
       ok: true,
-      database: isConnected ? DatabaseStatus.CONNECTED : DatabaseStatus.DISCONNECTED,
+      database: isConnected
+        ? DatabaseStatus.CONNECTED
+        : DatabaseStatus.DISCONNECTED,
     };
   }
 }

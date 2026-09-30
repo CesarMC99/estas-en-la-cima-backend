@@ -42,7 +42,10 @@ export class GraphqlExceptionFilter implements ExceptionFilter {
     // basta con DEVOLVER el error como en GraphQL, hay que ESCRIBIR la
     // respuesta; si no, la petición se quedaría colgada
     if (host.getType() === 'http') {
-      return this.replyHttp(exception, host.switchToHttp().getResponse<Response>());
+      return this.replyHttp(
+        exception,
+        host.switchToHttp().getResponse<Response>(),
+      );
     }
 
     // Si ya es un GraphQLError (por ejemplo, una consulta mal escrita), se respeta
@@ -52,13 +55,16 @@ export class GraphqlExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
-      const code = GraphqlExceptionFilter.CODE_BY_STATUS[status] ?? 'INTERNAL_SERVER_ERROR';
+      const code =
+        GraphqlExceptionFilter.CODE_BY_STATUS[status] ??
+        'INTERNAL_SERVER_ERROR';
 
       // El ValidationPipe empaqueta los mensajes de validación en response.message
       const response = exception.getResponse();
       const raw =
         typeof response === 'object' && response !== null
-          ? ((response as { message?: string | string[] }).message ?? exception.message)
+          ? ((response as { message?: string | string[] }).message ??
+            exception.message)
           : exception.message;
       // En inputs anidados el ValidationPipe antepone la ruta del campo
       // ("perfil.El correo…"): se quita, el mensaje es para personas
