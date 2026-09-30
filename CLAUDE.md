@@ -9,7 +9,8 @@ pnpm start:dev        # API con recarga en http://localhost:3100/graphql
 pnpm build            # nest build (también revisa tipos)
 pnpm lint             # oxlint con reglas que usan los tipos
 pnpm test             # pruebas unitarias (Vitest, *.spec.ts junto al código)
-pnpm test:e2e         # pruebas de punta a punta (test/*.e2e-spec.ts, usan la BD del .env)
+pnpm test:e2e         # pruebas de punta a punta (test/*.e2e-spec.ts, base <nombre>-test)
+pnpm seed             # carga categorías y productos iniciales (idempotente)
 ```
 
 Necesita `.env` (ver `.env.example`): `PORT` (3100), `FRONTEND_URL` (CORS, http://localhost:4100), `DATABASE_URI` (Atlas, base `estas-en-la-cima`).
@@ -58,3 +59,11 @@ GraphQL code-first: el esquema se genera en `src/schema.gql` al arrancar (nunca 
 - Correo: puerto `EMAIL_SENDER`; con `RESEND_API_KEY` usa Resend, sin ella escribe el correo en el log (en local el código se lee en la terminal del backend).
 - Protección: `@UseGuards(JwtAuthGuard)` + `@CurrentUser()` (el id sale del token); `@Roles('admin')` + `RolesGuard`. Límite global de 120 peticiones/min por IP (`GqlThrottlerGuard`) y 5/min en register, login, requestPasswordReset y resetPassword.
 - Pruebas: unitarias de casos de uso con dobles de `test-helpers.ts` (sin base ni Nest); e2e en `test/` contra la base `<nombre>-test` (la crea `test/setup-e2e.ts`, se borra al empezar) y con `EMAIL_SENDER` reemplazado por un buzón en memoria.
+
+## Catálogo y ranking (módulo `catalog`)
+
+- Consultas públicas: `categories` (activas, por `position`), `cimas` (el #1 de cada categoría activa, ordenadas con el mismo criterio del ranking) y `categoryRanking(slug)` (null si no existe; `leader` null si no tiene productos; `contenders` = del #2 en adelante con `missingCents` = diferencia + S/ 1).
+- El total vive en el producto (`totalCents`, entero en céntimos) junto con `totalReachedAt` para desempatar: orden `totalCents desc, totalReachedAt asc, _id asc` (`compareRanking` en `domain/ranking.ts` y `RANKING_SORT` en el repositorio deben coincidir). Índice compuesto `{categoryId, status, totalCents, totalReachedAt}`. Las donaciones sumarán con `$inc` atómico.
+- Solo productos `APPROVED` entran al ranking (`PENDING`/`REJECTED` quedan para las propuestas de los fans). `findPodiums` usa `$sort` + `$group` con `$firstN: 2` (líder y segundo de todas las categorías en una consulta).
+- `comments` de cada cima llega vacío hasta que exista el módulo de comentarios.
+- `scripts/seed-catalog.ts` (se ejecuta con Node directo, sin Nest): upsert por slug; los totales de demostración solo se ponen al crear (`$setOnInsert`), nunca pisan totales reales.

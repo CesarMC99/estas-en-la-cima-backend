@@ -17,6 +17,7 @@ import {
   emailConfig,
 } from './config/index.js';
 import { AuthModule } from './module/auth/auth.module.js';
+import { CatalogModule } from './module/catalog/catalog.module.js';
 import { HealthModule } from './module/health/health.module.js';
 import { UsersModule } from './module/users/users.module.js';
 
@@ -80,6 +81,7 @@ const IS_PRODUCTION = process.env.NODE_ENV === 'production';
     HealthModule,
     UsersModule,
     AuthModule,
+    CatalogModule,
   ],
   providers: [
     // Filtro global: traduce las excepciones a errores GraphQL con `code`

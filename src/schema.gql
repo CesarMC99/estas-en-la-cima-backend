@@ -24,6 +24,54 @@ type AuthPayload {
   account: Account!
 }
 
+type Category {
+  """
+  Título de la corona de su #1: "La mejor cerveza"
+  """
+  crownTitle: String!
+  id: ID!
+
+  """
+  Nombre corto: "Cervezas"
+  """
+  name: String!
+
+  """Para la URL: /categoria/cervezas"""
+  slug: String!
+}
+
+type CategoryRanking {
+  category: Category!
+  contenders: [Contender!]!
+
+  """null si la categoría aún no tiene productos"""
+  leader: Cima
+}
+
+"""El #1 de una categoría"""
+type Cima {
+  category: Category!
+  comments: [DonorComment!]!
+  product: Product!
+
+  """null si compite solo"""
+  rival: Rival
+
+  """Total acumulado en céntimos"""
+  totalCents: Int!
+}
+
+"""
+Un producto de "la cola para la cima"
+"""
+type Contender {
+  """Lo que le falta para superar al #1 (diferencia + S/ 1)"""
+  missingCents: Int!
+  position: Int!
+  product: Product!
+  totalCents: Int!
+}
+
 """Estado de la conexión con MongoDB"""
 enum DatabaseStatus {
   CONNECTED
@@ -34,6 +82,33 @@ enum DatabaseStatus {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+"""
+Comentario de uno de los 3 mayores donantes (se completa en el módulo de comentarios)
+"""
+type DonorComment {
+  amountCents: Int!
+  id: ID!
+
+  """Solo el mayor donante"""
+  media: DonorMedia
+
+  """1 = mayor donante; 2 y 3 los siguientes"""
+  rank: Int!
+  text: String!
+  username: String!
+}
+
+type DonorMedia {
+  durationSeconds: Int
+  kind: DonorMediaKind!
+  url: String
+}
+
+enum DonorMediaKind {
+  PHOTO
+  VIDEO
+}
 
 """Estado del servidor, para saber si está vivo"""
 type HealthStatus {
@@ -71,7 +146,25 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
 }
 
+type Product {
+  """Empresa dueña (solo informativa)"""
+  company: String!
+  id: ID!
+  imageUrl: String
+  name: String!
+  slug: String!
+}
+
 type Query {
+  """Categorías activas, en orden de navegación"""
+  categories: [Category!]!
+
+  """Ranking de una categoría; null si no existe"""
+  categoryRanking(slug: String!): CategoryRanking
+
+  """El #1 de cada categoría, del que más junta al que menos"""
+  cimas: [Cima!]!
+
   """Estado del servidor y de la base de datos"""
   health: HealthStatus!
 
@@ -98,4 +191,12 @@ input ResetPasswordInput {
   code: String!
   emailOrPhone: String!
   newPassword: String!
+}
+
+type Rival {
+  """Distancia con el #1, en céntimos"""
+  gapCents: Int!
+
+  """Nombre del segundo de la categoría"""
+  name: String!
 }
